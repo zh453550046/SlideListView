@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<uhoem.echoliv.com.scrollertest.view.MyLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/ll"
+    android:orientation="horizontal"
+    android:clickable="true"
+    android:layout_width="wrap_content"
+    android:layout_height="70dp">
+
+    <TextView
+        android:id="@+id/tv"
+        android:padding="16dp"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:textSize="16dp"
+        android:textColor="@android:color/black" />
+
+    <TextView
+        android:id="@+id/tv_right"
+        android:layout_width="60dp"
+        android:layout_height="match_parent"
+        android:background="@android:color/holo_red_light"
+        android:gravity="center"
+        android:text="删除"
+        android:textSize="16dp"
+        android:textColor="@android:color/white" />
+
+</uhoem.echoliv.com.scrollertest.view.MyLayout>
