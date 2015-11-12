@@ -6,32 +6,35 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
+import android.widget.AbsListView;
 import android.widget.LinearLayout;
 import android.widget.Scroller;
-import android.widget.Toast;
 
 import java.util.List;
 
 /**
  * Created by Administrator on 2015/11/10.
  */
-public class MyLayout extends LinearLayout implements View.OnClickListener {
+public class MyLayout extends LinearLayout implements AbsListView.OnScrollListener {
 
     private Scroller scroller;
     private VelocityTracker tracker;
     private boolean isShowAnimation, remove;
     private final int UNSCROLL = 0, SHOW_RIGHT = 1, HIDE_RIGHT = -1;
     private int width, scrollType = UNSCROLL;
-    private float xDown, xMove;
+    private float xDown, yDown, xMove, yMove;
     private List<MyLayout> list;
 
     public void setList(List<MyLayout> list) {
         this.list = list;
     }
 
+    public MyLayout(Context context) {
+        super(context);
+    }
+
     public MyLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
-        setOnClickListener(this);
         scroller = new Scroller(context);
     }
 
@@ -62,7 +65,6 @@ public class MyLayout extends LinearLayout implements View.OnClickListener {
                         for (MyLayout myLayout : list) {
                             if (myLayout != this && myLayout.getScrollType() == SHOW_RIGHT) {
                                 myLayout.hideRight();
-                                break;
                             }
                         }
                     }
@@ -71,32 +73,18 @@ public class MyLayout extends LinearLayout implements View.OnClickListener {
         }
     }
 
-    @Override
-    public void onClick(View v) {
-//        switch (scrollType) {
-//            case UNSCROLL:
-//            case HIDE_RIGHT:
-//                showRight();
-//                break;
-//            case SHOW_RIGHT:
-//                hideRight();
-//                break;
-//            default:
-//                break;
-//        }
-        Log.e("onclick", "onclick");
-    }
-
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
         switch (ev.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 xDown = ev.getX();
+                yDown = ev.getY();
                 break;
             case MotionEvent.ACTION_MOVE:
                 createTracker(ev);
                 xMove = ev.getX();
+                yMove = ev.getY();
                 int distance = (int) (xMove - xDown);
                 if (xMove - xDown < 0 && scroller.getCurrX() < width) {
                     if (scroller.getCurrX() + (-distance) >= width) {
@@ -115,16 +103,16 @@ public class MyLayout extends LinearLayout implements View.OnClickListener {
                 }
                 invalidate();
                 xDown = xMove;
+                Log.e("y", yMove - yDown + "");
+                if ((yMove - yDown < 10 && yMove - yDown > -10) || isYLowSpeed()) {
+                    yDown = yMove;
+                    return true;
+                } else {
+                    yDown = yMove;
+                }
                 break;
             case MotionEvent.ACTION_UP:
             case MotionEvent.ACTION_CANCEL:
-//                if (shouldHideRight() || (scroller.getCurrX() > 0 && scroller.getCurrX() < width / 2)) {
-//                    hideRight();
-//                } else {
-//                    if (shouldShowRight() || (scroller.getCurrX() >= width / 2 && scroller.getCurrX() < width)) {
-//                        showRight();
-//                    }
-//                }
                 if (shouldShowRight()) {
                     showRight();
                 } else {
@@ -145,11 +133,18 @@ public class MyLayout extends LinearLayout implements View.OnClickListener {
     }
 
 
+    public boolean isYLowSpeed() {
+        if (tracker != null) {
+            tracker.computeCurrentVelocity(1000);
+            return tracker.getYVelocity() < 500 && tracker.getYVelocity() > -500;
+        }
+        return false;
+    }
+
     private boolean shouldHideRight() {
         if (tracker != null) {
             tracker.computeCurrentVelocity(1000);
-            Log.e("shouldHideRight", "speed = " + tracker.getXVelocity());
-            return tracker.getXVelocity() > 500;
+            return tracker.getXVelocity() > 900;
         }
         return false;
     }
@@ -157,8 +152,7 @@ public class MyLayout extends LinearLayout implements View.OnClickListener {
     private boolean shouldShowRight() {
         if (tracker != null) {
             tracker.computeCurrentVelocity(1000);
-            Log.e("shouldShowRight", "speed = " + tracker.getXVelocity());
-            return tracker.getXVelocity() < -500;
+            return tracker.getXVelocity() < -900;
         }
         return false;
     }
@@ -207,6 +201,24 @@ public class MyLayout extends LinearLayout implements View.OnClickListener {
     public void setOnHideRightListener(OnHideRightListener onHideRightListener) {
         this.onHideRightListener = onHideRightListener;
     }
+
+    @Override
+    public void onScrollStateChanged(AbsListView view, int scrollState) {
+
+    }
+
+    @Override
+    public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+        if (list != null) {
+            for (MyLayout myLayout : list) {
+                if (myLayout.getScrollType() == SHOW_RIGHT) {
+                    myLayout.hideRight();
+                    break;
+                }
+            }
+        }
+    }
+
 
     public interface OnHideRightListener {
         void onHiderRight(boolean remove);

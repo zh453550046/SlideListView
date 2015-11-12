@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.LinearLayout;
+import android.widget.ListView;
 import android.widget.Scroller;
 import android.widget.TextView;
 
@@ -24,13 +25,15 @@ public class MyAdapter extends BaseAdapter {
     private Scroller scroller;
     private Context context;
     private List<String> list;
+    private ListView listView;
     private List<MyLayout> list_my_layout;
 
-    public MyAdapter(Context context, List<String> list) {
+    public MyAdapter(Context context, List<String> list, ListView listView) {
         scroller = new Scroller(context);
         this.context = context;
         this.list = list;
         list_my_layout = new ArrayList<>();
+        this.listView = listView;
     }
 
     @Override
@@ -58,6 +61,11 @@ public class MyAdapter extends BaseAdapter {
             viewHolder.tv = (TextView) convertView.findViewById(R.id.tv);
             viewHolder.tv_right = (TextView) convertView.findViewById(R.id.tv_right);
             convertView.setTag(viewHolder);
+            list_my_layout.add(viewHolder.ll);
+            for (MyLayout myLayout : list_my_layout) {
+                myLayout.setList(list_my_layout);
+            }
+            listView.setOnScrollListener(viewHolder.ll);
         } else {
             viewHolder = (ViewHolder) convertView.getTag();
         }
@@ -81,12 +89,6 @@ public class MyAdapter extends BaseAdapter {
                 viewHolder.ll.removeAfterhideRight(true);
             }
         });
-        list_my_layout.add(viewHolder.ll);
-        if (position == list.size() - 1) {
-            for (MyLayout myLayout : list_my_layout) {
-                myLayout.setList(list_my_layout);
-            }
-        }
         return convertView;
     }
 
